@@ -45,7 +45,6 @@
     favicon.height = 16;
     favicon.src = faviconUrl(tab);
     favicon.alt = "";
-    // Fallback on error: transparent pixel.
     favicon.onerror = function () {
       this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' rx='3' fill='%23ccc'/%3E%3C/svg%3E";
     };
@@ -270,10 +269,7 @@
     if (removeInfo.windowId !== currentWindowId) return;
     tabCache.delete(tabId);
     const el = tabListEl.querySelector(`[data-tab-id="${tabId}"]`);
-    if (el) {
-      el.remove();
-    }
-    // Show empty state if needed
+    if (el) el.remove();
     if (tabCache.size === 0) renderFullList();
   });
 
