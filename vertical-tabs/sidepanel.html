@@ -7,11 +7,70 @@
   <link rel="stylesheet" href="sidepanel.css">
 </head>
 <body>
+  <!-- Noise texture overlay -->
+  <div class="noise-overlay" aria-hidden="true"></div>
+
+  <!-- Search bar -->
   <div class="search-container">
-    <input type="text" id="search" placeholder="Search tabs…" autocomplete="off" spellcheck="false">
+    <input type="text" id="search" placeholder="Search tabs..." autocomplete="off" spellcheck="false" aria-label="Search tabs">
   </div>
-  <div id="tab-list" class="tab-list"></div>
-  <button id="new-tab" class="new-tab-btn">＋ New Tab</button>
+
+  <!-- Scrollable content area -->
+  <div id="scroll-area" class="scroll-area">
+    <!-- Pinned tabs section (hidden when empty) -->
+    <div id="pinned-section" class="pinned-section" hidden>
+      <div class="section-header">Pinned</div>
+      <div id="pinned-grid" class="pinned-grid" aria-label="Pinned tabs"></div>
+      <div class="section-divider"></div>
+    </div>
+
+    <!-- Tab groups and ungrouped tabs rendered here -->
+    <div id="tabs-container" class="tabs-container"></div>
+  </div>
+
+  <!-- Context menu -->
+  <div id="context-menu" class="context-menu" hidden aria-label="Tab actions">
+    <button class="ctx-item" data-action="pin" aria-label="Pin tab">Pin Tab</button>
+    <button class="ctx-item" data-action="mute" aria-label="Mute tab">Mute Tab</button>
+    <button class="ctx-item" data-action="duplicate" aria-label="Duplicate tab">Duplicate Tab</button>
+    <button class="ctx-item" data-action="new-window" aria-label="Move to new window">Move to New Window</button>
+    <button class="ctx-item" data-action="close" aria-label="Close tab">Close Tab</button>
+    <div class="ctx-separator"></div>
+    <button class="ctx-item" data-action="close-others" aria-label="Close other tabs">Close Other Tabs</button>
+    <button class="ctx-item" data-action="close-right" aria-label="Close tabs to the right">Close Tabs to the Right</button>
+  </div>
+
+  <!-- Theme settings panel -->
+  <div id="theme-panel" class="theme-panel" hidden>
+    <div class="theme-panel-header">
+      <span>Theme</span>
+      <button id="theme-close" class="theme-close-btn" aria-label="Close theme panel">&times;</button>
+    </div>
+    <div class="theme-presets" aria-label="Color themes">
+      <!-- Preset swatches rendered by JS -->
+    </div>
+    <div class="theme-mode-toggle" aria-label="Appearance mode">
+      <button class="mode-btn" data-mode="light" aria-label="Light mode" title="Light">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="3.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="mode-btn" data-mode="dark" aria-label="Dark mode" title="Dark">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M13.36 10.06A6 6 0 015.94 2.64 6 6 0 108 14a6 6 0 005.36-3.94z"/></svg>
+      </button>
+      <button class="mode-btn" data-mode="auto" aria-label="Auto mode" title="Auto">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zM2 8a6 6 0 016-6v12a6 6 0 01-6-6z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <button id="new-tab" class="bottom-btn new-tab-btn" aria-label="New tab">+ New Tab</button>
+    <button id="settings-btn" class="bottom-btn settings-btn" aria-label="Theme settings">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 1.2a1.5 1.5 0 013 0l.15.9a.6.6 0 00.4.43.6.6 0 00.57-.1l.72-.56a1.5 1.5 0 012.12 2.12l-.56.72a.6.6 0 00-.1.57.6.6 0 00.43.4l.9.15a1.5 1.5 0 010 3l-.9.15a.6.6 0 00-.43.4.6.6 0 00.1.57l.56.72a1.5 1.5 0 01-2.12 2.12l-.72-.56a.6.6 0 00-.57-.1.6.6 0 00-.4.43l-.15.9a1.5 1.5 0 01-3 0l-.15-.9a.6.6 0 00-.4-.43.6.6 0 00-.57.1l-.72.56a1.5 1.5 0 01-2.12-2.12l.56-.72a.6.6 0 00.1-.57.6.6 0 00-.43-.4l-.9-.15a1.5 1.5 0 010-3l.9-.15a.6.6 0 00.43-.4.6.6 0 00-.1-.57l-.56-.72A1.5 1.5 0 014.66 1.94l.72.56a.6.6 0 00.57.1.6.6 0 00.4-.43zM8 5.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/></svg>
+    </button>
+  </div>
+
+  <script src="themes.js"></script>
   <script src="sidepanel.js"></script>
 </body>
 </html>
