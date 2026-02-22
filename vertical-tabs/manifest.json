@@ -1,13 +1,15 @@
 {
   "manifest_version": 3,
   "name": "VerticalTabs",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Display all open browser tabs in a clean vertical sidebar, inspired by Arc browser. Quickly search, switch, reorder, and manage your tabs.",
   "minimum_chrome_version": "114",
   "permissions": [
     "tabs",
     "sidePanel",
-    "favicon"
+    "favicon",
+    "tabGroups",
+    "storage"
   ],
   "background": {
     "service_worker": "background.js"
@@ -27,5 +29,14 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+E",
+        "mac": "Command+Shift+E"
+      },
+      "description": "Toggle VerticalTabs side panel"
+    }
   }
 }
