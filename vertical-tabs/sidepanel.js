@@ -26,6 +26,24 @@
   let contextTabId = null;          // tab targeted by context menu
   let keyboardFocusIndex = -1;      // index in visible tab list
 
+  // ── Stale-tab-safe wrapper ───────────────────────────────────────────
+  // Refreshes the tab list when a chrome.tabs call fails (e.g. tab closed
+  // between the time we read it and the time we act on it).
+  async function safeTabOp(fn) {
+    try {
+      await fn();
+    } catch {
+      await refreshTabs();
+    }
+  }
+
+  async function refreshTabs() {
+    const tabs = await chrome.tabs.query({ windowId: currentWindowId });
+    tabCache.clear();
+    for (const tab of tabs) tabCache.set(tab.id, tab);
+    renderFullList();
+  }
+
   // ── Favicon helper ──────────────────────────────────────────────────
   function faviconUrl(tab) {
     if (tab.favIconUrl && tab.favIconUrl.startsWith("http")) {
@@ -404,7 +422,7 @@
     const pinned = e.target.closest(".pinned-tab");
     if (!pinned) return;
     const tabId = parseInt(pinned.dataset.tabId, 10);
-    chrome.tabs.update(tabId, { active: true });
+    safeTabOp(() => chrome.tabs.update(tabId, { active: true }));
   });
 
   pinnedGrid.addEventListener("contextmenu", (e) => {
@@ -431,7 +449,7 @@
       const item = closeBtn.closest(".tab-item");
       if (item) {
         const tabId = parseInt(item.dataset.tabId, 10);
-        chrome.tabs.remove(tabId);
+        safeTabOp(() => chrome.tabs.remove(tabId));
       }
       return;
     }
@@ -440,7 +458,7 @@
     const item = e.target.closest(".tab-item");
     if (item) {
       const tabId = parseInt(item.dataset.tabId, 10);
-      chrome.tabs.update(tabId, { active: true });
+      safeTabOp(() => chrome.tabs.update(tabId, { active: true }));
     }
   });
 
@@ -451,7 +469,7 @@
     if (item) {
       e.preventDefault();
       const tabId = parseInt(item.dataset.tabId, 10);
-      chrome.tabs.remove(tabId);
+      safeTabOp(() => chrome.tabs.remove(tabId));
     }
   });
 
@@ -542,26 +560,26 @@
 
     switch (action) {
       case "pin":
-        await chrome.tabs.update(tabId, { pinned: !tab.pinned });
+        await safeTabOp(() => chrome.tabs.update(tabId, { pinned: !tab.pinned }));
         break;
       case "mute": {
         const muted = tab.mutedInfo && tab.mutedInfo.muted;
-        await chrome.tabs.update(tabId, { muted: !muted });
+        await safeTabOp(() => chrome.tabs.update(tabId, { muted: !muted }));
         break;
       }
       case "duplicate":
-        await chrome.tabs.duplicate(tabId);
+        await safeTabOp(() => chrome.tabs.duplicate(tabId));
         break;
       case "new-window":
-        await chrome.windows.create({ tabId: tabId });
+        await safeTabOp(() => chrome.windows.create({ tabId: tabId }));
         break;
       case "close":
-        await chrome.tabs.remove(tabId);
+        await safeTabOp(() => chrome.tabs.remove(tabId));
         break;
       case "close-others": {
         const allTabs = getSortedTabs().filter((t) => !t.pinned);
         const toClose = allTabs.filter((t) => t.id !== tabId).map((t) => t.id);
-        if (toClose.length > 0) await chrome.tabs.remove(toClose);
+        if (toClose.length > 0) await safeTabOp(() => chrome.tabs.remove(toClose));
         break;
       }
       case "close-right": {
@@ -569,7 +587,7 @@
         const idx = allTabs.findIndex((t) => t.id === tabId);
         if (idx >= 0) {
           const toClose = allTabs.slice(idx + 1).map((t) => t.id);
-          if (toClose.length > 0) await chrome.tabs.remove(toClose);
+          if (toClose.length > 0) await safeTabOp(() => chrome.tabs.remove(toClose));
         }
         break;
       }
@@ -648,11 +666,11 @@
     } else if (e.key === "Enter" && keyboardFocusIndex >= 0 && keyboardFocusIndex < items.length) {
       e.preventDefault();
       const tabId = parseInt(items[keyboardFocusIndex].dataset.tabId, 10);
-      chrome.tabs.update(tabId, { active: true });
+      safeTabOp(() => chrome.tabs.update(tabId, { active: true }));
     } else if ((e.key === "Delete" || e.key === "Backspace") && keyboardFocusIndex >= 0 && keyboardFocusIndex < items.length) {
       e.preventDefault();
       const tabId = parseInt(items[keyboardFocusIndex].dataset.tabId, 10);
-      chrome.tabs.remove(tabId);
+      safeTabOp(() => chrome.tabs.remove(tabId));
       clearKeyboardFocus();
     }
   });
@@ -717,11 +735,7 @@
     const groupHeader = e.target.closest(".group-header");
     if (groupHeader) {
       const groupId = parseInt(groupHeader.dataset.groupId, 10);
-      try {
-        await chrome.tabs.group({ tabIds: dragTabId, groupId: groupId });
-      } catch {
-        // Silently fail
-      }
+      await safeTabOp(() => chrome.tabs.group({ tabIds: dragTabId, groupId: groupId }));
       return;
     }
 
@@ -731,7 +745,7 @@
     const targetTabId = parseInt(item.dataset.tabId, 10);
     const targetTab = tabCache.get(targetTabId);
     if (targetTab) {
-      chrome.tabs.move(dragTabId, { index: targetTab.index });
+      await safeTabOp(() => chrome.tabs.move(dragTabId, { index: targetTab.index }));
     }
   });
 
