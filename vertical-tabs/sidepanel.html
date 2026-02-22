@@ -10,9 +10,14 @@
   <!-- Noise texture overlay -->
   <div class="noise-overlay" aria-hidden="true"></div>
 
-  <!-- Search bar -->
+  <!-- Search bar + navigation controls -->
   <div class="search-container">
     <input type="text" id="search" placeholder="Search tabs..." autocomplete="off" spellcheck="false" aria-label="Search tabs">
+    <div class="nav-buttons">
+      <button id="nav-back" class="nav-btn" aria-label="Go back" title="Go back" disabled>&#x2190;</button>
+      <button id="nav-forward" class="nav-btn" aria-label="Go forward" title="Go forward" disabled>&#x2192;</button>
+      <button id="nav-reload" class="nav-btn" aria-label="Reload" title="Reload">&#x21BB;</button>
+    </div>
   </div>
 
   <!-- Scrollable content area -->

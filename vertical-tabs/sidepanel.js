@@ -15,6 +15,9 @@
   const newTabBtn = document.getElementById("new-tab");
   const settingsBtn = document.getElementById("settings-btn");
   const themeCloseBtn = document.getElementById("theme-close");
+  const navBackBtn = document.getElementById("nav-back");
+  const navForwardBtn = document.getElementById("nav-forward");
+  const navReloadBtn = document.getElementById("nav-reload");
 
   // ── State ───────────────────────────────────────────────────────────
   const tabCache = new Map();       // tabId -> tab object
@@ -43,6 +46,59 @@
     for (const tab of tabs) tabCache.set(tab.id, tab);
     renderFullList();
   }
+
+  // ── Navigation buttons ───────────────────────────────────────────────
+  function getActiveTabId() {
+    for (const [id, tab] of tabCache) {
+      if (tab.active) return id;
+    }
+    return null;
+  }
+
+  async function updateNavButtons() {
+    const tabId = getActiveTabId();
+    if (!tabId) {
+      navBackBtn.disabled = true;
+      navForwardBtn.disabled = true;
+      return;
+    }
+
+    try {
+      const results = await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        func: () => ({
+          canGoBack: navigation.canGoBack,
+          canGoForward: navigation.canGoForward,
+        }),
+      });
+      if (results && results[0] && results[0].result) {
+        navBackBtn.disabled = !results[0].result.canGoBack;
+        navForwardBtn.disabled = !results[0].result.canGoForward;
+      } else {
+        navBackBtn.disabled = false;
+        navForwardBtn.disabled = false;
+      }
+    } catch {
+      // Restricted page (chrome://, extensions, etc.) — enable both as fallback
+      navBackBtn.disabled = false;
+      navForwardBtn.disabled = false;
+    }
+  }
+
+  navBackBtn.addEventListener("click", () => {
+    const tabId = getActiveTabId();
+    if (tabId) safeTabOp(() => chrome.tabs.goBack(tabId));
+  });
+
+  navForwardBtn.addEventListener("click", () => {
+    const tabId = getActiveTabId();
+    if (tabId) safeTabOp(() => chrome.tabs.goForward(tabId));
+  });
+
+  navReloadBtn.addEventListener("click", () => {
+    const tabId = getActiveTabId();
+    if (tabId) safeTabOp(() => chrome.tabs.reload(tabId));
+  });
 
   // ── Favicon helper ──────────────────────────────────────────────────
   function faviconUrl(tab) {
@@ -343,6 +399,7 @@
     renderThemePanel();
 
     renderFullList();
+    updateNavButtons();
   }
 
   init();
@@ -785,6 +842,9 @@
       tabCache.set(tabId, tab);
     }
     updateTabInPlace(tabId);
+    if (changeInfo.status === "complete" && tab.active) {
+      updateNavButtons();
+    }
   });
 
   chrome.tabs.onActivated.addListener((activeInfo) => {
@@ -800,6 +860,7 @@
       tab.active = true;
       updateTabInPlace(activeInfo.tabId);
     }
+    updateNavButtons();
   });
 
   chrome.tabs.onMoved.addListener(async (_tabId, moveInfo) => {

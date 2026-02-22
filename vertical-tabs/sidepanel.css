@@ -51,16 +51,20 @@ body {
   background-repeat: repeat;
 }
 
-/* ── Search bar ────────────────────────────────────────────────────── */
+/* ── Search bar + nav buttons ──────────────────────────────────────── */
 .search-container {
   padding: 12px 12px 8px;
   flex-shrink: 0;
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 #search {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 36px;
   padding: 0 14px;
   border: none;
@@ -71,6 +75,41 @@ body {
   font-family: inherit;
   outline: none;
   transition: background 150ms ease;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.nav-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 28px;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+  transition: background 150ms ease, color 150ms ease, opacity 150ms ease;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+}
+
+[data-mode="light"] .nav-btn:hover:not(:disabled) {
+  background: rgba(0,0,0,0.07);
+}
+
+.nav-btn:disabled {
+  opacity: 0.3;
+  pointer-events: none;
 }
 
 [data-mode="light"] #search {

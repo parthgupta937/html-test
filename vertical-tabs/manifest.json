@@ -9,7 +9,8 @@
     "sidePanel",
     "favicon",
     "tabGroups",
-    "storage"
+    "storage",
+    "scripting"
   ],
   "background": {
     "service_worker": "background.js"
